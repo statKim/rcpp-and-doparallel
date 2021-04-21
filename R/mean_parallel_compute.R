@@ -44,15 +44,27 @@ mean_parallel_compute = function(n, mean = 0, sd = 1,
 
   # Compute estimates
   estimates = foreach::foreach(i = iterators::icount(n_sim), # Perform n simulations
+                               .export = c("mean_rcpp_wrap"),
                                .combine = "rbind",           # Combine results
                                                              # Self-load
                                .packages = "Rcpp2doParallel") %dopar% {
     random_data = rnorm(n, mean, sd)
 
-    result = mean_rcpp(random_data) # or use Rcpp2doParallel::mean_rcpp()
+    # result = mean_rcpp(random_data) # or use Rcpp2doParallel::mean_rcpp()
+    result = mean_rcpp_wrap(random_data)   # wrapper function of C++
 
     result
   }
 
   estimates
+}
+
+
+#' wrapper function of C++
+#'
+#' @param data an input vector
+#'
+#' @export
+mean_rcpp_wrap <- function(data) {
+  mean_rcpp(data)
 }
